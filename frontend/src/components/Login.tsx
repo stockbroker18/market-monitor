@@ -9,11 +9,9 @@ export default function Login({ onLogin }: Props) {
   const [error, setError] = useState("");
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user || !pass) { setError("Please enter username and password."); return; }
-    // TODO: validate against Supabase
-    // For now accept any credentials to test the UI
-    onLogin();
+  e.preventDefault();
+  if (!user || !pass) { setError("Please enter username and password."); return; }
+  onLogin(user);
   }
 
   return (
