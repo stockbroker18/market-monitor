@@ -28,7 +28,13 @@ logging.basicConfig(
 )
 log = logging.getLogger("market_monitor")
 
-ALLOWED_ORIGINS = ["*"]
+ALLOWED_ORIGINS = [
+    "https://market-monitor-taupe.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+]
 
 # ── Bloomberg session ────────────────────────────────────────────────────────
 bloomberg_session = BloombergSession()
@@ -66,7 +72,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
