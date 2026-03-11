@@ -159,16 +159,3 @@ async def unsubscribe(sid, data):
 
 
 combined_app = socketio.ASGIApp(sio, app)
-```
-
----
-
-**COMMANDS — run in this order:**
-```
-cd C:\Users\Nick\Projects\market-monitor && git pull
-```
-```
-taskkill /f /im python.exe
-```
-```
-cd C:\Users\Nick\Projects\market-monitor\backend && C:\Users\Nick\AppData\Local\Programs\Python\Python313\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000
