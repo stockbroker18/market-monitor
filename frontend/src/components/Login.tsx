@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./Login.css";
 
-interface Props { onLogin: () => void; }
+interface Props { onLogin: (username: string) => void; }
 
 export default function Login({ onLogin }: Props) {
   const [user, setUser] = useState("");
