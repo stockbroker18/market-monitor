@@ -6,11 +6,7 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
-export function useBackendUrl(username: string): {
-  backendUrl: string;
-  loading: boolean;
-  error: string | null;
-} {
+export function useBackendUrl(username: string) {
   const [backendUrl, setBackendUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +18,6 @@ export function useBackendUrl(username: string): {
       setLoading(true);
       setError(null);
 
-      // If running locally, always use local backend
       if (
         window.location.hostname === "localhost" ||
         window.location.hostname === "127.0.0.1"
@@ -32,7 +27,6 @@ export function useBackendUrl(username: string): {
         return;
       }
 
-      // Look up tunnel URL from Supabase
       const { data, error } = await supabase
         .from("tunnel_registry")
         .select("tunnel_url, is_online")
@@ -56,8 +50,6 @@ export function useBackendUrl(username: string): {
     }
 
     fetchTunnelUrl();
-
-    // Refresh every 60 seconds in case tunnel URL changes
     const interval = setInterval(fetchTunnelUrl, 60000);
     return () => clearInterval(interval);
   }, [username]);
