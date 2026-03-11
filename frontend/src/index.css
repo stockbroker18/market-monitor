@@ -1,0 +1,31 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap");
+
+:root {
+  --bg:        #0a0e14;
+  --surface:   #111820;
+  --border:    #1e2d3d;
+  --accent:    #00d4ff;
+  --accent2:   #00ff9d;
+  --warn:      #ff6b35;
+  --text:      #cdd9e5;
+  --muted:     #4a6174;
+  --up:        #00ff9d;
+  --down:      #ff4d6d;
+  --font-mono: "DM Mono", monospace;
+  --font-sans: "DM Sans", sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }

@@ -1,0 +1,57 @@
+.price-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.price-tile::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  opacity: 0.4;
+}
+
+.price-tile:hover { border-color: rgba(0,212,255,0.3); }
+.price-tile.error { border-color: rgba(255,77,109,0.3); }
+
+.price-tile-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.price-tile-ticker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.price-tile-value {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin: 4px 0;
+  transition: opacity 0.3s;
+}
+
+.price-tile-value.loading { opacity: 0.3; }
+
+.price-tile-field {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
