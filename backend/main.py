@@ -19,7 +19,6 @@ from bloomberg.subscriptions import SubscriptionManager
 from api.market_data import router as market_data_router
 from api.auth import router as auth_router
 
-# ── Config ───────────────────────────────────────────────────────────────────
 load_dotenv(dotenv_path="../config.env")
 
 logging.basicConfig(
@@ -37,12 +36,10 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:5174",
 ]
 
-# ── Bloomberg session ─────────────────────────────────────────────────────────
 bloomberg_session = BloombergSession()
 bloomberg_requests = BloombergRequests(bloomberg_session)
 subscription_manager = SubscriptionManager(bloomberg_session)
 
-# ── Socket.IO ─────────────────────────────────────────────────────────────────
 sio = socketio.AsyncServer(
     async_mode="asgi",
     cors_allowed_origins=ALLOWED_ORIGINS,
@@ -50,9 +47,7 @@ sio = socketio.AsyncServer(
     engineio_logger=False,
 )
 
-# ── Tunnel registration ───────────────────────────────────────────────────────
 async def register_tunnel_url():
-    """Register current tunnel URL to Supabase so frontend can find us."""
     supabase_url = os.getenv("SUPABASE_URL")
     supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
     tunnel_url = os.getenv("TUNNEL_URL")
@@ -83,7 +78,6 @@ async def register_tunnel_url():
         else:
             log.warning(f"Tunnel registration failed: {res.text}")
 
-# ── App lifecycle ─────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     log.info("Starting Market Monitor backend...")
@@ -97,7 +91,6 @@ async def lifespan(app: FastAPI):
     log.info("Shutting down...")
     bloomberg_session.stop()
 
-# ── FastAPI app ───────────────────────────────────────────────────────────────
 app = FastAPI(
     title="Market Monitor API",
     version="1.0.0",
@@ -130,7 +123,6 @@ async def health():
     }
 
 
-# ── Socket.IO events ──────────────────────────────────────────────────────────
 @sio.event
 async def connect(sid, environ, auth):
     token = auth.get("token") if auth else None
@@ -166,11 +158,12 @@ async def unsubscribe(sid, data):
         await subscription_manager.unsubscribe(sid, ticker)
 
 
-# ── Combined ASGI app ─────────────────────────────────────────────────────────
 combined_app = socketio.ASGIApp(sio, app)
 ```
 
-Commit that on GitHub, then run:
+---
+
+**COMMANDS — run in this order:**
 ```
 cd C:\Users\Nick\Projects\market-monitor && git pull
 ```
