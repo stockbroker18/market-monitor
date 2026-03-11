@@ -1,7 +1,6 @@
 import "./StatusBar.css";
 
 interface Props {
-  backendUrl: string;
   connected: boolean;
   loading: boolean;
 }
