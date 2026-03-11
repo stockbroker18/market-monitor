@@ -4,7 +4,6 @@ Connects to local Bloomberg Terminal via blpapi Desktop API.
 """
 
 import os
-import asyncio
 import logging
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
@@ -58,13 +57,33 @@ async def register_tunnel_url():
         return
 
     async with httpx.AsyncClient() as client:
+        # Try update first (PATCH existing row)
+        res = await client.patch(
+            f"{supabase_url}/rest/v1/tunnel_registry?username=eq.{username}",
+            headers={
+                "apikey": supabase_key,
+                "Authorization": f"Bearer {supabase_key}",
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal",
+            },
+            json={
+                "tunnel_url": tunnel_url,
+                "last_seen": "now()",
+                "is_online": True,
+            },
+        )
+        if res.status_code == 204:
+            log.info(f"Tunnel updated: {tunnel_url}")
+            return
+
+        # If no row exists yet, insert
         res = await client.post(
             f"{supabase_url}/rest/v1/tunnel_registry",
             headers={
                 "apikey": supabase_key,
                 "Authorization": f"Bearer {supabase_key}",
                 "Content-Type": "application/json",
-                "Prefer": "resolution=merge-duplicates,return=minimal",
+                "Prefer": "return=minimal",
             },
             json={
                 "username": username,
@@ -73,7 +92,7 @@ async def register_tunnel_url():
                 "is_online": True,
             },
         )
-        if res.status_code in (200, 201, 204):
+        if res.status_code in (200, 201):
             log.info(f"Tunnel registered: {tunnel_url}")
         else:
             log.warning(f"Tunnel registration failed: {res.text}")
