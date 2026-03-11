@@ -5,7 +5,7 @@ interface Props {
   loading: boolean;
 }
 
-export default function StatusBar({ backendUrl, connected, loading }: Props) {
+export default function StatusBar({ connected, loading }: Props) {
   const now = new Date().toLocaleTimeString();
 
   return (
