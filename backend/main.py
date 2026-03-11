@@ -8,6 +8,7 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import socketio
@@ -18,7 +19,7 @@ from bloomberg.subscriptions import SubscriptionManager
 from api.market_data import router as market_data_router
 from api.auth import router as auth_router
 
-# ── Config ──────────────────────────────────────────────────────────────────
+# ── Config ───────────────────────────────────────────────────────────────────
 load_dotenv(dotenv_path="../config.env")
 
 logging.basicConfig(
@@ -36,12 +37,12 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:5174",
 ]
 
-# ── Bloomberg session ────────────────────────────────────────────────────────
+# ── Bloomberg session ─────────────────────────────────────────────────────────
 bloomberg_session = BloombergSession()
 bloomberg_requests = BloombergRequests(bloomberg_session)
 subscription_manager = SubscriptionManager(bloomberg_session)
 
-# ── Socket.IO ────────────────────────────────────────────────────────────────
+# ── Socket.IO ─────────────────────────────────────────────────────────────────
 sio = socketio.AsyncServer(
     async_mode="asgi",
     cors_allowed_origins=ALLOWED_ORIGINS,
@@ -49,7 +50,40 @@ sio = socketio.AsyncServer(
     engineio_logger=False,
 )
 
-# ── App lifecycle ────────────────────────────────────────────────────────────
+# ── Tunnel registration ───────────────────────────────────────────────────────
+async def register_tunnel_url():
+    """Register current tunnel URL to Supabase so frontend can find us."""
+    supabase_url = os.getenv("SUPABASE_URL")
+    supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
+    tunnel_url = os.getenv("TUNNEL_URL")
+    username = os.getenv("MM_USERNAME")
+
+    if not all([supabase_url, supabase_key, tunnel_url, username]):
+        log.warning("Tunnel registration skipped — missing config.")
+        return
+
+    async with httpx.AsyncClient() as client:
+        res = await client.post(
+            f"{supabase_url}/rest/v1/tunnel_registry",
+            headers={
+                "apikey": supabase_key,
+                "Authorization": f"Bearer {supabase_key}",
+                "Content-Type": "application/json",
+                "Prefer": "resolution=merge-duplicates",
+            },
+            json={
+                "username": username,
+                "tunnel_url": tunnel_url,
+                "last_seen": "now()",
+                "is_online": True,
+            },
+        )
+        if res.status_code in (200, 201):
+            log.info(f"Tunnel registered: {tunnel_url}")
+        else:
+            log.warning(f"Tunnel registration failed: {res.text}")
+
+# ── App lifecycle ─────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     log.info("Starting Market Monitor backend...")
@@ -58,12 +92,12 @@ async def lifespan(app: FastAPI):
         log.info("Bloomberg Terminal connection established.")
     except Exception as e:
         log.error(f"Could not connect to Bloomberg Terminal: {e}")
-        log.error("Ensure Bloomberg Terminal is open and logged in.")
+    await register_tunnel_url()
     yield
     log.info("Shutting down...")
     bloomberg_session.stop()
 
-# ── FastAPI app ──────────────────────────────────────────────────────────────
+# ── FastAPI app ───────────────────────────────────────────────────────────────
 app = FastAPI(
     title="Market Monitor API",
     version="1.0.0",
@@ -87,7 +121,6 @@ app.state.subscription_manager = subscription_manager
 
 @app.get("/health")
 async def health():
-    """Health check — used by START.bat to confirm backend is ready."""
     connected = bloomberg_session.is_connected()
     return {
         "status": "ok",
@@ -97,7 +130,7 @@ async def health():
     }
 
 
-# ── Socket.IO events ─────────────────────────────────────────────────────────
+# ── Socket.IO events ──────────────────────────────────────────────────────────
 @sio.event
 async def connect(sid, environ, auth):
     token = auth.get("token") if auth else None
@@ -114,10 +147,6 @@ async def disconnect(sid):
 
 @sio.event
 async def subscribe(sid, data):
-    """
-    Subscribe to real-time Bloomberg data.
-    data = { "ticker": "GT10 Govt", "fields": ["YLD_YTM_MID"] }
-    """
     ticker = data.get("ticker")
     fields = data.get("fields", ["PX_LAST"])
     if not ticker:
@@ -137,5 +166,5 @@ async def unsubscribe(sid, data):
         await subscription_manager.unsubscribe(sid, ticker)
 
 
-# ── Combined ASGI app ────────────────────────────────────────────────────────
+# ── Combined ASGI app ─────────────────────────────────────────────────────────
 combined_app = socketio.ASGIApp(sio, app)
