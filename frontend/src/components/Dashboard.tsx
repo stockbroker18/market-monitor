@@ -23,7 +23,6 @@ export default function Dashboard({ backendUrl }: Props) {
   return (
     <div className="dashboard">
       <StatusBar
-        backendUrl={backendUrl}
         connected={health.data?.bloomberg_connected ?? false}
         loading={health.isLoading}
       />
