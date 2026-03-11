@@ -9,9 +9,9 @@ export default function Login({ onLogin }: Props) {
   const [error, setError] = useState("");
 
   function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  if (!user || !pass) { setError("Please enter username and password."); return; }
-  onLogin(user);
+    e.preventDefault();
+    if (!user || !pass) { setError("Please enter username and password."); return; }
+    onLogin(user);
   }
 
   return (
@@ -50,3 +50,16 @@ export default function Login({ onLogin }: Props) {
     </div>
   );
 }
+```
+
+---
+
+Once all three are committed, run:
+```
+cd C:\Users\Nick\Projects\market-monitor && git pull
+```
+```
+cd C:\Users\Nick\Projects\market-monitor\frontend && npm install @supabase/supabase-js
+```
+```
+cd C:\Users\Nick\Projects\market-monitor\frontend && npm run dev
