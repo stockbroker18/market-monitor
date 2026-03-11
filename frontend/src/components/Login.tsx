@@ -50,16 +50,3 @@ export default function Login({ onLogin }: Props) {
     </div>
   );
 }
-```
-
----
-
-Once all three are committed, run:
-```
-cd C:\Users\Nick\Projects\market-monitor && git pull
-```
-```
-cd C:\Users\Nick\Projects\market-monitor\frontend && npm install @supabase/supabase-js
-```
-```
-cd C:\Users\Nick\Projects\market-monitor\frontend && npm run dev
