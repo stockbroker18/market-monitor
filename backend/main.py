@@ -69,7 +69,7 @@ async def register_tunnel_url():
                 "apikey": supabase_key,
                 "Authorization": f"Bearer {supabase_key}",
                 "Content-Type": "application/json",
-                "Prefer": "resolution=merge-duplicates",
+                "Prefer": "resolution=merge-duplicates,return=minimal",
             },
             json={
                 "username": username,
@@ -78,7 +78,7 @@ async def register_tunnel_url():
                 "is_online": True,
             },
         )
-        if res.status_code in (200, 201):
+        if res.status_code in (200, 201, 204):
             log.info(f"Tunnel registered: {tunnel_url}")
         else:
             log.warning(f"Tunnel registration failed: {res.text}")
@@ -168,3 +168,14 @@ async def unsubscribe(sid, data):
 
 # ── Combined ASGI app ─────────────────────────────────────────────────────────
 combined_app = socketio.ASGIApp(sio, app)
+```
+
+Commit that on GitHub, then run:
+```
+cd C:\Users\Nick\Projects\market-monitor && git pull
+```
+```
+taskkill /f /im python.exe
+```
+```
+cd C:\Users\Nick\Projects\market-monitor\backend && C:\Users\Nick\AppData\Local\Programs\Python\Python313\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000
